@@ -29,8 +29,8 @@ async function main() {
   const targetAuditId = process.argv[2] || null;
 
   console.log('[generate-render-props] Connecting to MongoDB...');
-  await mongoose.connect(MONGO_URI);
-  console.log('[generate-render-props] Connected.');
+  await mongoose.connect(MONGO_URI, process.env.MONGO_DB_NAME ? { dbName: process.env.MONGO_DB_NAME } : {});
+  console.log(`[generate-render-props] Connected to database: ${mongoose.connection.name}`);
 
   const db = mongoose.connection.db;
   const col = db.collection('homepage_audits');

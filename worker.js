@@ -146,9 +146,14 @@ class VideoWorker {
 
   async connectMongo() {
     try {
-      await mongoose.connect(this.mongoUri);
+      // MONGO_DB_NAME must match odito_backend/.env and python_workers/.env;
+      // without it a URI lacking /dbname silently resolves to "test".
+      await mongoose.connect(this.mongoUri, process.env.MONGO_DB_NAME ? { dbName: process.env.MONGO_DB_NAME } : {});
       console.log('[VIDEO_WORKER] Connected to MongoDB');
       console.log(`🔗 [VIDEO_WORKER] Connected to MongoDB database: ${mongoose.connection.name}`);
+      if (!process.env.MONGO_DB_NAME && !/^mongodb(\+srv)?:\/\/[^/]+\/[^/?]+/.test(this.mongoUri || '')) {
+        console.warn(`⚠️  [VIDEO_WORKER] MONGO_URI has no database name and MONGO_DB_NAME is not set — using "${mongoose.connection.name}", which may differ from the backend's database.`);
+      }
     } catch (error) {
       console.error('[VIDEO_WORKER] MongoDB connection failed:', error);
     }
